@@ -1,6 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 
 const UUID_RE =
@@ -50,4 +51,62 @@ export async function startConversation(formData: FormData) {
   }
 
   redirect(`/messages/${created.id}`);
+}
+
+export type RateProfessorState = {
+  error: string | null;
+};
+
+export async function rateProfessor(
+  profId: string,
+  _prevState: RateProfessorState,
+  formData: FormData
+): Promise<RateProfessorState> {
+  if (!UUID_RE.test(profId)) {
+    redirect("/annuaire");
+  }
+
+  const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect(`/auth/connexion?next=/annuaire/${profId}`);
+  }
+
+  if (user.id === profId) {
+    return { error: "Tu ne peux pas te noter toi-même." };
+  }
+
+  const stars = Number(formData.get("stars"));
+  const comment = (formData.get("comment") as string)?.trim() || null;
+
+  if (!Number.isInteger(stars) || stars < 1 || stars > 5) {
+    return { error: "Choisis une note entre 1 et 5 étoiles." };
+  }
+
+  const { data: existing } = await supabase
+    .from("ratings")
+    .select("id")
+    .eq("prof_id", profId)
+    .eq("student_id", user.id)
+    .maybeSingle();
+
+  const { error } = existing
+    ? await supabase
+        .from("ratings")
+        .update({ stars, comment })
+        .eq("id", (existing as { id: string }).id)
+    : await supabase
+        .from("ratings")
+        .insert({ prof_id: profId, student_id: user.id, stars, comment });
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath(`/annuaire/${profId}`);
+  return { error: null };
 }

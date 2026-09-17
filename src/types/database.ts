@@ -45,6 +45,7 @@ export type Rating = {
   student_id: string;
   stars: number;
   comment: string | null;
+  created_at: string;
 };
 
 export type Database = {

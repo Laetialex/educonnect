@@ -2,7 +2,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { startConversation } from "./actions";
-import type { Profile } from "@/types/database";
+import RatingForm from "./RatingForm";
+import type { Profile, Rating } from "@/types/database";
 
 export default async function ProfilPublicPage({
   params,
@@ -39,6 +40,37 @@ export default async function ProfilPublicPage({
   const isSelf = user?.id === p.id;
   const canBookAppointment =
     user && !isSelf && viewerRole === "eleve" && p.role === "professeur";
+  const canRate = user && !isSelf && viewerRole === "eleve" && p.role === "professeur";
+
+  let ratings: Rating[] = [];
+  let ratingNameById = new Map<string, string>();
+  if (p.role === "professeur") {
+    const { data: ratingsData } = await supabase
+      .from("ratings")
+      .select("*")
+      .eq("prof_id", p.id)
+      .order("created_at", { ascending: false })
+      .returns<Rating[]>();
+    ratings = ratingsData ?? [];
+
+    const studentIds = Array.from(new Set(ratings.map((r) => r.student_id)));
+    if (studentIds.length) {
+      const { data: students } = await supabase
+        .from("profiles")
+        .select("id, name")
+        .in("id", studentIds)
+        .returns<Pick<Profile, "id" | "name">[]>();
+      ratingNameById = new Map((students ?? []).map((s) => [s.id, s.name ?? "Élève"]));
+    }
+  }
+
+  const averageStars = ratings.length
+    ? ratings.reduce((sum, r) => sum + r.stars, 0) / ratings.length
+    : null;
+
+  const myRating = user
+    ? ratings.find((r) => r.student_id === user.id) ?? null
+    : null;
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-16">
@@ -59,6 +91,15 @@ export default async function ProfilPublicPage({
             {p.role === "professeur" ? "Professeur" : "Élève"}
           </span>
         </div>
+
+        {p.role === "professeur" && averageStars !== null && (
+          <p className="mt-1 text-sm text-amber-600">
+            ⭐ {averageStars.toFixed(1)} / 5{" "}
+            <span className="text-slate-400">
+              ({ratings.length} avis)
+            </span>
+          </p>
+        )}
 
         {p.role === "professeur" && p.profession && (
           <p className="mt-2 text-slate-600">{p.profession}</p>
@@ -125,6 +166,44 @@ export default async function ProfilPublicPage({
           </p>
         )}
       </div>
+
+      {p.role === "professeur" && (
+        <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <h2 className="font-bold text-slate-900">Avis des élèves</h2>
+
+          {canRate && (
+            <div className="mt-4 border-b border-slate-100 pb-6">
+              <RatingForm
+                profId={p.id}
+                existingStars={myRating?.stars ?? null}
+                existingComment={myRating?.comment ?? null}
+              />
+            </div>
+          )}
+
+          {ratings.length === 0 ? (
+            <p className="mt-3 text-sm text-slate-400">Aucun avis pour le moment.</p>
+          ) : (
+            <ul className="mt-4 space-y-4">
+              {ratings.map((rating) => (
+                <li key={rating.id} className="text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="font-semibold text-slate-800">
+                      {ratingNameById.get(rating.student_id) ?? "Élève"}
+                    </span>
+                    <span className="text-amber-500">
+                      {"⭐".repeat(rating.stars)}
+                    </span>
+                  </div>
+                  {rating.comment && (
+                    <p className="mt-1 text-slate-600">{rating.comment}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
     </div>
   );
 }
