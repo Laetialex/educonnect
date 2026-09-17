@@ -21,6 +21,12 @@ export default async function Header() {
 
           {user ? (
             <>
+              <Link href="/messages" className="hover:text-blue-600">
+                Messagerie
+              </Link>
+              <Link href="/rendez-vous" className="hover:text-blue-600">
+                Rendez-vous
+              </Link>
               <Link href="/profil" className="hover:text-blue-600">
                 Mon profil
               </Link>

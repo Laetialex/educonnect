@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { Profile } from "@/types/database";
 
@@ -31,9 +32,10 @@ export default async function AnnuairePage() {
 
       <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {profiles?.map((profile) => (
-          <div
+          <Link
             key={profile.id}
-            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm"
+            href={`/annuaire/${profile.id}`}
+            className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-blue-400 hover:shadow-md"
           >
             <div className="flex items-center justify-between">
               <h2 className="font-bold text-slate-900">
@@ -76,7 +78,7 @@ export default async function AnnuairePage() {
                 Dispo : {profile.availability}
               </p>
             )}
-          </div>
+          </Link>
         ))}
       </div>
     </div>

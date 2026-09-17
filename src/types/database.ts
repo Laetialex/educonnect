@@ -22,7 +22,7 @@ export type Message = {
   conversation_id: string;
   sender_id: string;
   text: string;
-  created_at?: string;
+  created_at: string;
 };
 
 export type AppointmentStatus = "en_attente" | "accepte" | "refuse";
@@ -36,6 +36,7 @@ export type Appointment = {
   subject: string;
   message: string | null;
   status: AppointmentStatus | string;
+  created_at: string;
 };
 
 export type Rating = {
