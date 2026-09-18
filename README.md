@@ -19,11 +19,13 @@ Plateforme Next.js qui met en relation élèves et professeurs particuliers, ave
 
 2. Remplis `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` avec les valeurs de ton projet Supabase (Project Settings → API).
 
-3. **Policies RLS de `profiles` (obligatoire)** — exécute le contenu de `supabase/migrations/20260918181846_fix_profiles_rls.sql` dans le **SQL Editor** de ton dashboard Supabase (ou via `supabase db push` si tu utilises la Supabase CLI reliée à ce projet). Cette migration ne peut pas être appliquée automatiquement par l'app : ni la clé `anon` ni un accès applicatif ne permettent de créer des policies, seul un accès SQL direct au projet (dashboard ou CLI) le peut.
+3. **Policies RLS de `profiles` (obligatoire)** — exécute le contenu de `supabase/migrations/20260918205407_reset_profiles_rls.sql` dans le **SQL Editor** de ton dashboard Supabase (ou via `supabase db push` si tu utilises la Supabase CLI reliée à ce projet). **Ceci ne peut pas être appliqué automatiquement** : merger une PR ou redéployer sur Vercel ne touche que le code de l'app, jamais la base Supabase elle-même — ni la clé `anon`, ni l'app, ni le déploiement ne permettent de créer/modifier des policies RLS, seul un accès SQL direct au projet (dashboard ou CLI) le peut.
 
-   Elle configure :
+   Cette migration **supprime d'abord toutes les policies existantes** sur `profiles` (quel que soit leur nom) avant de recréer exactement celles-ci :
    - `select` pour tout le monde (anon + authenticated), pour que l'annuaire fonctionne sans connexion ;
    - `insert`/`update` uniquement quand `auth.uid() = id`, pour que chaque utilisateur ne crée/modifie que son propre profil.
+
+   Elle remplace `supabase/migrations/20260918181846_fix_profiles_rls.sql` (gardée pour l'historique) : utilise la version `reset_profiles_rls`, plus robuste si une ancienne policy oubliée traîne encore.
 
    Sans cette migration, la création de dossier échoue avec l'erreur `new row violates row-level security policy for table "profiles"`.
 
