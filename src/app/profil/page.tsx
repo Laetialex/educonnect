@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import ProfilForm from "./ProfilForm";
+import { normalizeSubjects } from "@/lib/subjects";
 import type { Profile, Role } from "@/types/database";
 
 export default async function ProfilPage({
@@ -16,11 +17,18 @@ export default async function ProfilPage({
     redirect("/auth/connexion?next=/profil");
   }
 
-  const { data: profile } = await supabase
+  const { data: profileData } = await supabase
     .from("profiles")
     .select("*")
     .eq("id", user.id)
     .maybeSingle();
+
+  const profile = profileData
+    ? {
+        ...(profileData as Profile),
+        subjects: normalizeSubjects((profileData as Profile).subjects),
+      }
+    : null;
 
   const params = await searchParams;
   const roleParam = Array.isArray(params.role) ? params.role[0] : params.role;
@@ -41,7 +49,7 @@ export default async function ProfilPage({
       )}
 
       <div className="mt-8">
-        <ProfilForm profile={(profile as Profile) ?? null} defaultRole={defaultRole} />
+        <ProfilForm profile={profile} defaultRole={defaultRole} />
       </div>
     </div>
   );

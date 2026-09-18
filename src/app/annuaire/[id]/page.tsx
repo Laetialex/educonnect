@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { startConversation } from "./actions";
 import RatingForm from "./RatingForm";
+import { normalizeSubjects } from "@/lib/subjects";
 import type { Profile, Rating } from "@/types/database";
 
 export default async function ProfilPublicPage({
@@ -21,7 +22,7 @@ export default async function ProfilPublicPage({
     notFound();
   }
 
-  const p = profile as Profile;
+  const p = { ...(profile as Profile), subjects: normalizeSubjects((profile as Profile).subjects) };
 
   const {
     data: { user },

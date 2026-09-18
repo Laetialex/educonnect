@@ -59,12 +59,25 @@ export async function upsertProfile(
           profession: null,
         };
 
-  const { error } = await supabase.from("profiles").upsert(profile);
+  let upsertError: string | null = null;
 
-  if (error) {
-    return { error: error.message };
+  try {
+    const { error } = await supabase.from("profiles").upsert(profile);
+    upsertError = error?.message ?? null;
+  } catch {
+    upsertError = "Une erreur inattendue est survenue. Réessaie.";
+  }
+
+  if (upsertError) {
+    return { error: upsertError };
   }
 
   revalidatePath("/annuaire");
-  redirect("/profil?enregistre=1");
+  revalidatePath("/profil");
+
+  // Redirige vers une page publique (non protégée par le middleware
+  // d'authentification) plutôt que vers /profil : évite de faire
+  // repasser la navigation qui suit la Server Action par le contrôle
+  // d'auth d'une route protégée juste après la mutation.
+  redirect("/annuaire?enregistre=1");
 }

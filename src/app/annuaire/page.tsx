@@ -1,15 +1,26 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { normalizeSubjects } from "@/lib/subjects";
 import type { Profile } from "@/types/database";
 
-export default async function AnnuairePage() {
+export default async function AnnuairePage({
+  searchParams,
+}: PageProps<"/annuaire">) {
   const supabase = await createClient();
 
-  const { data: profiles, error } = await supabase
+  const { data: profilesData, error } = await supabase
     .from("profiles")
     .select("*")
     .order("name", { ascending: true })
     .returns<Profile[]>();
+
+  const profiles = profilesData?.map((p) => ({
+    ...p,
+    subjects: normalizeSubjects(p.subjects),
+  }));
+
+  const params = await searchParams;
+  const justSaved = params.enregistre === "1";
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-16">
@@ -17,6 +28,12 @@ export default async function AnnuairePage() {
       <p className="mt-1 text-sm text-slate-500">
         Retrouve tous les élèves et professeurs inscrits sur EduConnect.
       </p>
+
+      {justSaved && (
+        <p className="mt-4 rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700">
+          Ton dossier a bien été enregistré ✅
+        </p>
+      )}
 
       {error && (
         <p className="mt-6 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
