@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
+import { OTP_LENGTH } from "@/lib/auth";
 import type { Role } from "@/types/database";
 
 export default function InscriptionForm({
@@ -94,7 +95,7 @@ export default function InscriptionForm({
         <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
           <p className="font-semibold">Vérifie ta boîte mail 📬</p>
           <p className="mt-1">
-            Nous avons envoyé un code à 6 chiffres à <b>{email}</b>.
+            Nous avons envoyé un code à {OTP_LENGTH} chiffres à <b>{email}</b>.
             Saisis-le ci-dessous pour activer ton compte.
           </p>
         </div>
@@ -108,13 +109,13 @@ export default function InscriptionForm({
             type="text"
             inputMode="numeric"
             pattern="[0-9]*"
-            maxLength={6}
+            maxLength={OTP_LENGTH}
             required
             autoFocus
             value={code}
             onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-center text-lg tracking-[0.5em] focus:border-blue-500 focus:outline-none"
-            placeholder="000000"
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-center text-lg tracking-[0.35em] focus:border-blue-500 focus:outline-none"
+            placeholder={"0".repeat(OTP_LENGTH)}
           />
         </div>
 
@@ -132,7 +133,7 @@ export default function InscriptionForm({
 
         <button
           type="submit"
-          disabled={codeLoading || code.length !== 6}
+          disabled={codeLoading || code.length !== OTP_LENGTH}
           className="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
         >
           {codeLoading ? "Vérification..." : "Confirmer mon compte"}

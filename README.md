@@ -23,7 +23,7 @@ Plateforme Next.js qui met en relation élèves et professeurs particuliers, ave
    - `select` pour tout le monde (anon + authenticated), pour que l'annuaire fonctionne sans connexion ;
    - `insert`/`update` uniquement quand `auth.uid() = id`, pour que chaque utilisateur ne modifie que son propre profil.
 
-4. **Templates d'email (obligatoire)** — la confirmation d'inscription et la réinitialisation de mot de passe utilisent un **code à 6 chiffres** (pas un lien magique). Ce code existe toujours côté Supabase, mais il n'apparaît dans l'email que si le template l'affiche. Va dans **Authentication → Email Templates** et ajoute `{{ .Token }}` dans le corps de ces deux templates :
+4. **Templates d'email (obligatoire)** — la confirmation d'inscription et la réinitialisation de mot de passe utilisent un **code numérique** (pas un lien magique). Ce code existe toujours côté Supabase, mais il n'apparaît dans l'email que si le template l'affiche. Va dans **Authentication → Email Templates** et ajoute `{{ .Token }}` dans le corps de ces deux templates :
 
    - Template **Confirm signup**, ajoute par exemple :
      ```html
@@ -34,7 +34,9 @@ Plateforme Next.js qui met en relation élèves et professeurs particuliers, ave
      <p>Ton code de réinitialisation : <strong>{{ .Token }}</strong></p>
      ```
 
-   Sans cette modification, le code est généré par Supabase mais jamais envoyé à l'utilisateur, et les pages « code à 6 chiffres » de l'app ne pourront jamais être validées.
+   Sans cette modification, le code est généré par Supabase mais jamais envoyé à l'utilisateur, et les pages « code de vérification » de l'app ne pourront jamais être validées.
+
+   La **longueur** du code (`OTP Length` dans **Authentication → Sign In / Providers → Email**, 8 chiffres sur ce projet) doit correspondre à la constante `OTP_LENGTH` définie dans `src/lib/auth.ts`. Si tu changes ce réglage côté Supabase, mets aussi à jour cette constante.
 
 ## Lancer le projet en local
 
