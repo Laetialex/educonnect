@@ -30,7 +30,7 @@ export default function InscriptionForm({
       password,
       options: {
         data: { role },
-        emailRedirectTo: `${window.location.origin}/auth/confirm?next=/profil`,
+        emailRedirectTo: `${window.location.origin}/profil`,
       },
     });
 
