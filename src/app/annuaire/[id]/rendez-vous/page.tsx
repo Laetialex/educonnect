@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import RendezVousForm from "./RendezVousForm";
+import { normalizeSubjects } from "@/lib/subjects";
 import type { Profile } from "@/types/database";
 
 export default async function RendezVousPage({
@@ -57,7 +58,7 @@ export default async function RendezVousPage({
       </p>
 
       <div className="mt-8">
-        <RendezVousForm profId={id} subjects={prof.subjects ?? []} />
+        <RendezVousForm profId={id} subjects={normalizeSubjects(prof.subjects)} />
       </div>
     </div>
   );
