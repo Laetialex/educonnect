@@ -19,9 +19,13 @@ Plateforme Next.js qui met en relation élèves et professeurs particuliers, ave
 
 2. Remplis `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` avec les valeurs de ton projet Supabase (Project Settings → API).
 
-3. Assure-toi que la Row Level Security (RLS) de la table `profiles` autorise :
+3. **Policies RLS de `profiles` (obligatoire)** — exécute le contenu de `supabase/migrations/20260918181846_fix_profiles_rls.sql` dans le **SQL Editor** de ton dashboard Supabase (ou via `supabase db push` si tu utilises la Supabase CLI reliée à ce projet). Cette migration ne peut pas être appliquée automatiquement par l'app : ni la clé `anon` ni un accès applicatif ne permettent de créer des policies, seul un accès SQL direct au projet (dashboard ou CLI) le peut.
+
+   Elle configure :
    - `select` pour tout le monde (anon + authenticated), pour que l'annuaire fonctionne sans connexion ;
-   - `insert`/`update` uniquement quand `auth.uid() = id`, pour que chaque utilisateur ne modifie que son propre profil.
+   - `insert`/`update` uniquement quand `auth.uid() = id`, pour que chaque utilisateur ne crée/modifie que son propre profil.
+
+   Sans cette migration, la création de dossier échoue avec l'erreur `new row violates row-level security policy for table "profiles"`.
 
 4. **Templates d'email (obligatoire)** — la confirmation d'inscription et la réinitialisation de mot de passe utilisent un **code numérique** (pas un lien magique). Ce code existe toujours côté Supabase, mais il n'apparaît dans l'email que si le template l'affiche. Va dans **Authentication → Email Templates** et ajoute `{{ .Token }}` dans le corps de ces deux templates :
 
