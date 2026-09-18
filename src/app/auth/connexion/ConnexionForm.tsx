@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -78,6 +79,13 @@ export default function ConnexionForm({ next }: { next: string }) {
       >
         {loading ? "Connexion..." : "Se connecter"}
       </button>
+
+      <Link
+        href="/auth/reinitialiser-mot-de-passe"
+        className="block text-center text-sm text-slate-500 hover:text-blue-600"
+      >
+        Mot de passe oublié ?
+      </Link>
     </form>
   );
 }

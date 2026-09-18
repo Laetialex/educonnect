@@ -5,9 +5,9 @@ Plateforme Next.js qui met en relation élèves et professeurs particuliers, ave
 ## Fonctionnalités actuelles
 
 1. **Page d'accueil** avec deux parcours : « Je suis élève » / « Je suis professeur ».
-2. **Inscription / connexion par email** via Supabase Auth (`src/app/auth/inscription`, `src/app/auth/connexion`).
+2. **Inscription / connexion par email** via Supabase Auth (`src/app/auth/inscription`, `src/app/auth/connexion`), avec mot de passe oublié (`src/app/auth/reinitialiser-mot-de-passe`).
 3. **Formulaire de dossier** (`src/app/profil`) qui enregistre le profil (élève ou professeur) dans la table `profiles`.
-4. **Annuaire** (`src/app/annuaire`) qui affiche tous les profils enregistrés dans Supabase.
+4. **Annuaire** (`src/app/annuaire`) qui affiche tous les profils enregistrés dans Supabase, avec page de profil public, messagerie et prise de rendez-vous.
 
 ## Configuration
 
@@ -22,6 +22,19 @@ Plateforme Next.js qui met en relation élèves et professeurs particuliers, ave
 3. Assure-toi que la Row Level Security (RLS) de la table `profiles` autorise :
    - `select` pour tout le monde (anon + authenticated), pour que l'annuaire fonctionne sans connexion ;
    - `insert`/`update` uniquement quand `auth.uid() = id`, pour que chaque utilisateur ne modifie que son propre profil.
+
+4. **Templates d'email (obligatoire)** — la confirmation d'inscription et la réinitialisation de mot de passe utilisent un **code à 6 chiffres** (pas un lien magique). Ce code existe toujours côté Supabase, mais il n'apparaît dans l'email que si le template l'affiche. Va dans **Authentication → Email Templates** et ajoute `{{ .Token }}` dans le corps de ces deux templates :
+
+   - Template **Confirm signup**, ajoute par exemple :
+     ```html
+     <p>Ton code de confirmation : <strong>{{ .Token }}</strong></p>
+     ```
+   - Template **Reset Password**, ajoute par exemple :
+     ```html
+     <p>Ton code de réinitialisation : <strong>{{ .Token }}</strong></p>
+     ```
+
+   Sans cette modification, le code est généré par Supabase mais jamais envoyé à l'utilisateur, et les pages « code à 6 chiffres » de l'app ne pourront jamais être validées.
 
 ## Lancer le projet en local
 

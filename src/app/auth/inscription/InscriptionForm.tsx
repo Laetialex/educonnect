@@ -18,7 +18,12 @@ export default function InscriptionForm({
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [checkEmail, setCheckEmail] = useState(false);
+  const [awaitingCode, setAwaitingCode] = useState(false);
+
+  const [code, setCode] = useState("");
+  const [codeLoading, setCodeLoading] = useState(false);
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const [resent, setResent] = useState(false);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -30,7 +35,6 @@ export default function InscriptionForm({
       password,
       options: {
         data: { role },
-        emailRedirectTo: `${window.location.origin}/auth/confirm?next=/profil`,
       },
     });
 
@@ -46,20 +50,102 @@ export default function InscriptionForm({
       router.push(`/profil?role=${role}`);
       router.refresh();
     } else {
-      // Confirmation email activée : il faut cliquer sur le lien reçu par mail.
-      setCheckEmail(true);
+      // Confirmation par code activée : il faut saisir le code reçu par mail.
+      setAwaitingCode(true);
     }
   }
 
-  if (checkEmail) {
+  async function handleCodeSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setCodeError(null);
+    setCodeLoading(true);
+
+    const { error } = await supabase.auth.verifyOtp({
+      email,
+      token: code,
+      type: "signup",
+    });
+
+    setCodeLoading(false);
+
+    if (error) {
+      setCodeError("Code invalide ou expiré.");
+      return;
+    }
+
+    router.push(`/profil?role=${role}`);
+    router.refresh();
+  }
+
+  async function handleResend() {
+    setCodeError(null);
+    setResent(false);
+    const { error } = await supabase.auth.resend({ type: "signup", email });
+    if (error) {
+      setCodeError(error.message);
+      return;
+    }
+    setResent(true);
+  }
+
+  if (awaitingCode) {
     return (
-      <div className="rounded-xl border border-blue-200 bg-blue-50 p-6 text-center text-blue-800">
-        <p className="font-semibold">Vérifie ta boîte mail 📬</p>
-        <p className="mt-2 text-sm">
-          Nous avons envoyé un lien de confirmation à <b>{email}</b>. Clique
-          dessus pour activer ton compte.
-        </p>
-      </div>
+      <form onSubmit={handleCodeSubmit} className="space-y-4">
+        <div className="rounded-xl border border-blue-200 bg-blue-50 p-4 text-sm text-blue-800">
+          <p className="font-semibold">Vérifie ta boîte mail 📬</p>
+          <p className="mt-1">
+            Nous avons envoyé un code à 6 chiffres à <b>{email}</b>.
+            Saisis-le ci-dessous pour activer ton compte.
+          </p>
+        </div>
+
+        <div>
+          <label htmlFor="code" className="mb-1 block text-sm font-medium text-slate-700">
+            Code de confirmation
+          </label>
+          <input
+            id="code"
+            type="text"
+            inputMode="numeric"
+            pattern="[0-9]*"
+            maxLength={6}
+            required
+            autoFocus
+            value={code}
+            onChange={(e) => setCode(e.target.value.replace(/\D/g, ""))}
+            className="w-full rounded-lg border border-slate-300 px-3 py-2 text-center text-lg tracking-[0.5em] focus:border-blue-500 focus:outline-none"
+            placeholder="000000"
+          />
+        </div>
+
+        {codeError && (
+          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+            {codeError}
+          </p>
+        )}
+
+        {resent && (
+          <p className="rounded-lg bg-green-50 px-3 py-2 text-sm text-green-700">
+            Un nouveau code vient d&apos;être envoyé.
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={codeLoading || code.length !== 6}
+          className="w-full rounded-lg bg-blue-600 px-4 py-2 font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60"
+        >
+          {codeLoading ? "Vérification..." : "Confirmer mon compte"}
+        </button>
+
+        <button
+          type="button"
+          onClick={handleResend}
+          className="w-full text-center text-sm text-slate-500 hover:text-blue-600"
+        >
+          Renvoyer le code
+        </button>
+      </form>
     );
   }
 
