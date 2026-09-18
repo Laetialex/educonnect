@@ -23,18 +23,18 @@ Plateforme Next.js qui met en relation élèves et professeurs particuliers, ave
    - `select` pour tout le monde (anon + authenticated), pour que l'annuaire fonctionne sans connexion ;
    - `insert`/`update` uniquement quand `auth.uid() = id`, pour que chaque utilisateur ne modifie que son propre profil.
 
-4. **Templates d'email** — dans le dashboard Supabase, va dans **Authentication → Email Templates** et remplace le lien (`{{ .ConfirmationURL }}`) par la version suivante, pour que les liens pointent vers les routes de l'app plutôt que vers une page hébergée par Supabase :
+4. **Templates d'email (obligatoire)** — la confirmation d'inscription et la réinitialisation de mot de passe utilisent un **code à 6 chiffres** (pas un lien magique). Ce code existe toujours côté Supabase, mais il n'apparaît dans l'email que si le template l'affiche. Va dans **Authentication → Email Templates** et ajoute `{{ .Token }}` dans le corps de ces deux templates :
 
-   - Template **Confirm signup** :
+   - Template **Confirm signup**, ajoute par exemple :
+     ```html
+     <p>Ton code de confirmation : <strong>{{ .Token }}</strong></p>
      ```
-     {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=email&next={{ .RedirectTo }}
-     ```
-   - Template **Reset Password** :
-     ```
-     {{ .SiteURL }}/auth/confirm?token_hash={{ .TokenHash }}&type=recovery&next={{ .RedirectTo }}
+   - Template **Reset Password**, ajoute par exemple :
+     ```html
+     <p>Ton code de réinitialisation : <strong>{{ .Token }}</strong></p>
      ```
 
-   Sans cette modification, Supabase redirige d'abord vers son propre domaine avant de revenir sur le site, ce qui peut casser la session côté serveur (Next.js). C'est la configuration recommandée par Supabase pour les apps Next.js en SSR.
+   Sans cette modification, le code est généré par Supabase mais jamais envoyé à l'utilisateur, et les pages « code à 6 chiffres » de l'app ne pourront jamais être validées.
 
 ## Lancer le projet en local
 
