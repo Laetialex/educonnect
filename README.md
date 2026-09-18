@@ -19,15 +19,17 @@ Plateforme Next.js qui met en relation élèves et professeurs particuliers, ave
 
 2. Remplis `NEXT_PUBLIC_SUPABASE_URL` et `NEXT_PUBLIC_SUPABASE_ANON_KEY` avec les valeurs de ton projet Supabase (Project Settings → API).
 
-3. **Policies RLS de `profiles` (obligatoire)** — exécute le contenu de `supabase/migrations/20260918205407_reset_profiles_rls.sql` dans le **SQL Editor** de ton dashboard Supabase (ou via `supabase db push` si tu utilises la Supabase CLI reliée à ce projet). **Ceci ne peut pas être appliqué automatiquement** : merger une PR ou redéployer sur Vercel ne touche que le code de l'app, jamais la base Supabase elle-même — ni la clé `anon`, ni l'app, ni le déploiement ne permettent de créer/modifier des policies RLS, seul un accès SQL direct au projet (dashboard ou CLI) le peut.
+3. **Policies RLS de `profiles` (obligatoire)** — exécute le contenu de `supabase/migrations/20260918210105_verify_profiles_rls.sql` dans le **SQL Editor** de ton dashboard Supabase (ou via `supabase db push` si tu utilises la Supabase CLI reliée à ce projet). **Ceci ne peut pas être appliqué automatiquement** : merger une PR ou redéployer sur Vercel ne touche que le code de l'app, jamais la base Supabase elle-même — ni la clé `anon`, ni l'app, ni le déploiement ne permettent de créer/modifier des policies RLS, seul un accès SQL direct au projet (dashboard ou CLI) le peut.
 
-   Cette migration **supprime d'abord toutes les policies existantes** sur `profiles` (quel que soit leur nom) avant de recréer exactement celles-ci :
+   Cette migration **supprime d'abord toutes les policies existantes** sur `profiles` (quel que soit leur nom) avant de recréer exactement celles-ci, et **affiche le résultat** dans le SQL Editor pour vérifier immédiatement que ça a fonctionné (3 lignes attendues) :
    - `select` pour tout le monde (anon + authenticated), pour que l'annuaire fonctionne sans connexion ;
    - `insert`/`update` uniquement quand `auth.uid() = id`, pour que chaque utilisateur ne crée/modifie que son propre profil.
 
-   Elle remplace `supabase/migrations/20260918181846_fix_profiles_rls.sql` (gardée pour l'historique) : utilise la version `reset_profiles_rls`, plus robuste si une ancienne policy oubliée traîne encore.
+   `profiles.id` **est** `auth.users.id` (convention Supabase standard) — il n'y a pas et il ne faut pas de colonne `user_id` séparée ; toutes les autres tables (`appointments`, `ratings`, `conversations`, `messages`) référencent déjà `profiles.id`.
 
-   Sans cette migration, la création de dossier échoue avec l'erreur `new row violates row-level security policy for table "profiles"`.
+   Remplace les migrations précédentes (`20260918181846_fix_profiles_rls.sql`, `20260918205407_reset_profiles_rls.sql`, gardées pour l'historique) : utilise la version `verify_profiles_rls`, la plus récente.
+
+   Sans cette migration **effectivement exécutée dans le SQL Editor**, la création de dossier échoue avec l'erreur `new row violates row-level security policy for table "profiles"`.
 
 4. **Templates d'email (obligatoire)** — la confirmation d'inscription et la réinitialisation de mot de passe utilisent un **code numérique** (pas un lien magique). Ce code existe toujours côté Supabase, mais il n'apparaît dans l'email que si le template l'affiche. Va dans **Authentication → Email Templates** et ajoute `{{ .Token }}` dans le corps de ces deux templates :
 
