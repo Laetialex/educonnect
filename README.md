@@ -31,7 +31,9 @@ Plateforme Next.js qui met en relation élèves et professeurs particuliers, ave
 
    Sans cette migration **effectivement exécutée dans le SQL Editor**, la création de dossier échoue avec l'erreur `new row violates row-level security policy for table "profiles"`.
 
-4. **Templates d'email (obligatoire)** — la confirmation d'inscription et la réinitialisation de mot de passe utilisent un **code numérique** (pas un lien magique). Ce code existe toujours côté Supabase, mais il n'apparaît dans l'email que si le template l'affiche. Va dans **Authentication → Email Templates** et ajoute `{{ .Token }}` dans le corps de ces deux templates :
+4. **Contrainte CHECK sur `profiles.role` (obligatoire)** — exécute le contenu de `supabase/migrations/20260919211532_fix_profiles_role_check.sql` dans le **SQL Editor**. La base avait une contrainte `profiles_role_check` qui n'autorisait pas la valeur `"professeur"` (utilisée partout dans le code : `types/database.ts`, formulaires, pages d'affichage), ce qui faisait échouer la création d'un dossier professeur avec `new row for relation "profiles" violates check constraint "profiles_role_check"`. Cette migration remplace la contrainte par `role in ('eleve', 'professeur')` et affiche sa nouvelle définition pour vérification.
+
+5. **Templates d'email (obligatoire)** — la confirmation d'inscription et la réinitialisation de mot de passe utilisent un **code numérique** (pas un lien magique). Ce code existe toujours côté Supabase, mais il n'apparaît dans l'email que si le template l'affiche. Va dans **Authentication → Email Templates** et ajoute `{{ .Token }}` dans le corps de ces deux templates :
 
    - Template **Confirm signup**, ajoute par exemple :
      ```html
