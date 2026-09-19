@@ -73,8 +73,11 @@ export default async function AnnuairePage({
               <p className="mt-2 text-sm text-slate-600">{profile.profession}</p>
             )}
 
-            {profile.role === "eleve" && profile.level && (
-              <p className="mt-2 text-sm text-slate-600">Niveau : {profile.level}</p>
+            {profile.level && (
+              <p className="mt-2 text-sm text-slate-600">
+                {profile.role === "professeur" ? "Niveau enseigné" : "Niveau"} :{" "}
+                {profile.level}
+              </p>
             )}
 
             {profile.subjects && profile.subjects.length > 0 && (

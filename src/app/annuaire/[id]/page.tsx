@@ -105,8 +105,10 @@ export default async function ProfilPublicPage({
         {p.role === "professeur" && p.profession && (
           <p className="mt-2 text-slate-600">{p.profession}</p>
         )}
-        {p.role === "eleve" && p.level && (
-          <p className="mt-2 text-slate-600">Niveau : {p.level}</p>
+        {p.level && (
+          <p className="mt-2 text-slate-600">
+            {p.role === "professeur" ? "Niveau enseigné" : "Niveau"} : {p.level}
+          </p>
         )}
 
         {p.subjects && p.subjects.length > 0 && (

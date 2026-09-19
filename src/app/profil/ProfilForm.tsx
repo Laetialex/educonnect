@@ -6,6 +6,8 @@ import type { Profile, Role } from "@/types/database";
 
 const initialState: UpsertProfileState = { error: null };
 
+const NIVEAUX_ENSEIGNES = ["Collège", "Lycée", "Université"] as const;
+
 export default function ProfilForm({
   profile,
   defaultRole,
@@ -18,6 +20,19 @@ export default function ProfilForm({
     initialState
   );
   const [role, setRole] = useState<Role>(profile?.role ?? defaultRole);
+  const [niveauxEnseignes, setNiveauxEnseignes] = useState<string[]>(() =>
+    profile?.role === "professeur" && profile.level
+      ? profile.level.split(",").map((s) => s.trim()).filter(Boolean)
+      : []
+  );
+
+  function toggleNiveauEnseigne(niveau: string) {
+    setNiveauxEnseignes((prev) =>
+      prev.includes(niveau)
+        ? prev.filter((n) => n !== niveau)
+        : [...prev, niveau]
+    );
+  }
 
   return (
     <form action={formAction} className="space-y-5">
@@ -74,24 +89,53 @@ export default function ProfilForm({
           <input
             id="level"
             name="level"
+            required
             defaultValue={profile?.level ?? ""}
             className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
             placeholder="Ex : Seconde, Terminale, Licence 1..."
           />
         </div>
       ) : (
-        <div>
-          <label htmlFor="profession" className="mb-1 block text-sm font-medium text-slate-700">
-            Profession / diplôme
-          </label>
-          <input
-            id="profession"
-            name="profession"
-            defaultValue={profile?.profession ?? ""}
-            className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
-            placeholder="Ex : Professeure de mathématiques certifiée"
-          />
-        </div>
+        <>
+          <div>
+            <label htmlFor="profession" className="mb-1 block text-sm font-medium text-slate-700">
+              Profession / diplôme
+            </label>
+            <input
+              id="profession"
+              name="profession"
+              defaultValue={profile?.profession ?? ""}
+              className="w-full rounded-lg border border-slate-300 px-3 py-2 focus:border-blue-500 focus:outline-none"
+              placeholder="Ex : Professeure de mathématiques certifiée"
+            />
+          </div>
+
+          <div>
+            <label className="mb-2 block text-sm font-medium text-slate-700">
+              Niveau enseigné
+            </label>
+            <div className="grid grid-cols-3 gap-3">
+              {NIVEAUX_ENSEIGNES.map((niveau) => (
+                <button
+                  key={niveau}
+                  type="button"
+                  onClick={() => toggleNiveauEnseigne(niveau)}
+                  className={`rounded-lg border px-4 py-2 text-sm font-semibold ${
+                    niveauxEnseignes.includes(niveau)
+                      ? "border-blue-600 bg-blue-50 text-blue-700"
+                      : "border-slate-200 text-slate-600"
+                  }`}
+                >
+                  {niveau}
+                </button>
+              ))}
+            </div>
+            <p className="mt-1 text-xs text-slate-400">
+              Sélectionne un ou plusieurs niveaux.
+            </p>
+            <input type="hidden" name="level" value={niveauxEnseignes.join(", ")} />
+          </div>
+        </>
       )}
 
       <div>
