@@ -8,8 +8,10 @@ import type { Profile, Rating } from "@/types/database";
 
 export default async function ProfilPublicPage({
   params,
+  searchParams,
 }: PageProps<"/annuaire/[id]">) {
   const { id } = await params;
+  const { erreur } = await searchParams;
   const supabase = await createClient();
 
   const { data: profile } = await supabase
@@ -78,6 +80,13 @@ export default async function ProfilPublicPage({
       <Link href="/annuaire" className="text-sm text-slate-500 hover:text-blue-600">
         ← Retour à l&apos;annuaire
       </Link>
+
+      {erreur === "conversation" && (
+        <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          Impossible d&apos;ouvrir la conversation pour le moment. Réessaie
+          dans un instant.
+        </p>
+      )}
 
       <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <div className="flex items-center justify-between">

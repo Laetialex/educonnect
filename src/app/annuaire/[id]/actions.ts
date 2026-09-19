@@ -47,6 +47,7 @@ export async function startConversation(formData: FormData) {
     .single();
 
   if (error || !created) {
+    console.error("startConversation: échec de création de la conversation", error);
     redirect(`/annuaire/${otherUserId}?erreur=conversation`);
   }
 

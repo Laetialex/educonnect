@@ -33,7 +33,9 @@ Plateforme Next.js qui met en relation élèves et professeurs particuliers, ave
 
 4. **Contrainte CHECK sur `profiles.role` (obligatoire)** — exécute le contenu de `supabase/migrations/20260919211532_fix_profiles_role_check.sql` dans le **SQL Editor**. La base avait une contrainte `profiles_role_check` qui n'autorisait pas la valeur `"professeur"` (utilisée partout dans le code : `types/database.ts`, formulaires, pages d'affichage), ce qui faisait échouer la création d'un dossier professeur avec `new row for relation "profiles" violates check constraint "profiles_role_check"`. Cette migration remplace la contrainte par `role in ('eleve', 'professeur')` et affiche sa nouvelle définition pour vérification.
 
-5. **Templates d'email (obligatoire)** — la confirmation d'inscription et la réinitialisation de mot de passe utilisent un **code numérique** (pas un lien magique). Ce code existe toujours côté Supabase, mais il n'apparaît dans l'email que si le template l'affiche. Va dans **Authentication → Email Templates** et ajoute `{{ .Token }}` dans le corps de ces deux templates :
+5. **Policies RLS de `conversations`/`messages` (obligatoire)** — exécute le contenu de `supabase/migrations/20260919214052_fix_conversations_messages_rls.sql` dans le **SQL Editor**. Ces deux tables n'avaient jamais eu de policies RLS configurées, donc toute écriture y était silencieusement refusée (RLS activée par défaut = tout refusé sans policy). C'est pour ça que cliquer sur « Envoyer un message » ne faisait rien. Cette migration limite la lecture/écriture aux deux participants de chaque conversation (contrairement à `profiles`, ces tables ne sont pas publiques) et affiche les policies créées pour vérification.
+
+6. **Templates d'email (obligatoire)** — la confirmation d'inscription et la réinitialisation de mot de passe utilisent un **code numérique** (pas un lien magique). Ce code existe toujours côté Supabase, mais il n'apparaît dans l'email que si le template l'affiche. Va dans **Authentication → Email Templates** et ajoute `{{ .Token }}` dans le corps de ces deux templates :
 
    - Template **Confirm signup**, ajoute par exemple :
      ```html
