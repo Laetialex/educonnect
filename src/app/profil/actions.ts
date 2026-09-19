@@ -25,6 +25,7 @@ export async function upsertProfile(
 
   const role = formData.get("role") as Role;
   const name = (formData.get("name") as string)?.trim();
+  const level = (formData.get("level") as string)?.trim();
   const subjectsRaw = (formData.get("subjects") as string) ?? "";
   const subjects = subjectsRaw
     .split(",")
@@ -36,6 +37,15 @@ export async function upsertProfile(
     return { error: "Le nom est obligatoire." };
   }
 
+  if (!level) {
+    return {
+      error:
+        role === "professeur"
+          ? "Choisis au moins un niveau enseigné."
+          : "Le niveau scolaire est obligatoire.",
+    };
+  }
+
   const profile: Profile =
     role === "professeur"
       ? {
@@ -45,7 +55,7 @@ export async function upsertProfile(
           subjects,
           profession: (formData.get("profession") as string)?.trim() || null,
           availability,
-          level: null,
+          level,
           problems: null,
         }
       : {
@@ -53,7 +63,7 @@ export async function upsertProfile(
           role,
           name,
           subjects,
-          level: (formData.get("level") as string)?.trim() || null,
+          level,
           problems: (formData.get("problems") as string)?.trim() || null,
           availability,
           profession: null,
