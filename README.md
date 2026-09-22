@@ -66,3 +66,5 @@ Le site est ensuite disponible sur http://localhost:3000.
 - `src/lib/supabase/middleware.ts` + `src/proxy.ts` — rafraîchissement de la session et protection des pages privées (`/profil`).
 - `src/types/database.ts` — types TypeScript correspondant aux tables Supabase.
 - `src/app/profil/actions.ts` — Server Action qui fait l'upsert dans `profiles`.
+
+_(Déploiement initial sur Vercel — projet dédié à EduConnect, séparé de site-AM.)_
