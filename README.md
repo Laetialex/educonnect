@@ -76,3 +76,5 @@ _(Redéploiement : correction de NEXT_PUBLIC_SUPABASE_ANON_KEY.)_
 _(Redéploiement : ANON_KEY recorrigée, contenait un caractère de masquage.)_
 
 _(Redéploiement : ANON_KEY importée via Import .env.)_
+
+_(Redéploiement : NEXT_PUBLIC_SUPABASE_URL recorrigée via Import .env.)_
