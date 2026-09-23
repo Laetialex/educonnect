@@ -70,3 +70,5 @@ Le site est ensuite disponible sur http://localhost:3000.
 _(Déploiement initial sur Vercel — projet dédié à EduConnect, séparé de site-AM.)_
 
 _(Redéploiement forcé pour prendre en compte NEXT_PUBLIC_SUPABASE_URL.)_
+
+_(Redéploiement : correction de NEXT_PUBLIC_SUPABASE_ANON_KEY.)_
