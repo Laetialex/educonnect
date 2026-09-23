@@ -68,3 +68,5 @@ Le site est ensuite disponible sur http://localhost:3000.
 - `src/app/profil/actions.ts` — Server Action qui fait l'upsert dans `profiles`.
 
 _(Déploiement initial sur Vercel — projet dédié à EduConnect, séparé de site-AM.)_
+
+_(Redéploiement forcé pour prendre en compte NEXT_PUBLIC_SUPABASE_URL.)_
