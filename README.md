@@ -72,3 +72,5 @@ _(Déploiement initial sur Vercel — projet dédié à EduConnect, séparé de 
 _(Redéploiement forcé pour prendre en compte NEXT_PUBLIC_SUPABASE_URL.)_
 
 _(Redéploiement : correction de NEXT_PUBLIC_SUPABASE_ANON_KEY.)_
+
+_(Redéploiement : ANON_KEY recorrigée, contenait un caractère de masquage.)_
