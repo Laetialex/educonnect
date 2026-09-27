@@ -37,6 +37,22 @@ export default async function Debug998NotifsPage() {
     (c) => (c as { id: string }).id
   );
 
+  const otherIds = (conversations ?? []).map((c) => {
+    const conv = c as { user1_id: string; user2_id: string };
+    return conv.user1_id === user.id ? conv.user2_id : conv.user1_id;
+  });
+
+  const { data: otherProfiles } = otherIds.length
+    ? await supabase.from("profiles").select("id, name").in("id", otherIds)
+    : { data: [] };
+
+  const otherNameById = new Map(
+    (otherProfiles ?? []).map((p) => [
+      (p as { id: string }).id,
+      (p as { name: string | null }).name,
+    ])
+  );
+
   const { data: messages } = conversationIds.length
     ? await supabase
         .from("messages")
@@ -59,6 +75,22 @@ export default async function Debug998NotifsPage() {
           {counts.messages}
         </strong>
       </p>
+
+      <h2 className="mt-8 font-bold">Tu discutes avec :</h2>
+      <ul className="mt-2 space-y-1 text-sm">
+        {(conversations ?? []).length === 0 && <li>Aucune conversation.</li>}
+        {(conversations ?? []).map((c) => {
+          const conv = c as { id: string; user1_id: string; user2_id: string };
+          const otherId =
+            conv.user1_id === user.id ? conv.user2_id : conv.user1_id;
+          return (
+            <li key={conv.id}>
+              <strong>{otherNameById.get(otherId) ?? "(sans nom)"}</strong> —
+              identifiant : <code>{otherId}</code>
+            </li>
+          );
+        })}
+      </ul>
 
       <h2 className="mt-8 font-bold">Tes 15 derniers messages (tous, envoyés et reçus) :</h2>
       <ul className="mt-2 space-y-2 text-sm">
