@@ -38,7 +38,20 @@ export default async function RendezVousPage({
   const viewerProfile = viewerProfileData as Pick<Profile, "role"> | null;
 
   if (viewerProfile?.role !== "eleve") {
-    redirect(`/annuaire/${id}`);
+    return (
+      <div className="mx-auto max-w-xl px-4 py-16">
+        <Link
+          href={`/annuaire/${id}`}
+          className="text-sm text-slate-500 hover:text-blue-600"
+        >
+          ← Retour au profil
+        </Link>
+        <p className="mt-4 rounded-lg bg-red-50 px-3 py-2 text-sm text-red-700">
+          Seul un compte élève peut prendre rendez-vous avec un professeur.
+          {!viewerProfile && " Complète d'abord ton dossier dans « Mon profil »."}
+        </p>
+      </div>
+    );
   }
 
   return (

@@ -30,6 +30,14 @@ export default async function ProfilPage({
       }
     : null;
 
+  if (profile?.role === "professeur") {
+    await supabase
+      .from("ratings")
+      .update({ prof_seen: true })
+      .eq("prof_id", user.id)
+      .eq("prof_seen", false);
+  }
+
   const params = await searchParams;
   const roleParam = Array.isArray(params.role) ? params.role[0] : params.role;
   const defaultRole: Role = roleParam === "professeur" ? "professeur" : "eleve";

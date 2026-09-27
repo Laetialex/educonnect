@@ -31,6 +31,19 @@ export default async function RendezVousListPage({
   const params = await searchParams;
   const justSent = params.envoye === "1";
 
+  await Promise.all([
+    supabase
+      .from("appointments")
+      .update({ prof_seen: true })
+      .eq("prof_id", user.id)
+      .eq("prof_seen", false),
+    supabase
+      .from("appointments")
+      .update({ student_seen: true })
+      .eq("student_id", user.id)
+      .eq("student_seen", false),
+  ]);
+
   const { data: appointments } = await supabase
     .from("appointments")
     .select("*")

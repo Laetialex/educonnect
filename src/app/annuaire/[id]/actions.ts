@@ -98,11 +98,11 @@ export async function rateProfessor(
   const { error } = existing
     ? await supabase
         .from("ratings")
-        .update({ stars, comment })
+        .update({ stars, comment, prof_seen: false })
         .eq("id", (existing as { id: string }).id)
     : await supabase
         .from("ratings")
-        .insert({ prof_id: profId, student_id: user.id, stars, comment });
+        .insert({ prof_id: profId, student_id: user.id, stars, comment, prof_seen: false });
 
   if (error) {
     return { error: error.message };

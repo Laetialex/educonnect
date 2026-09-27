@@ -45,6 +45,13 @@ export default async function ConversationPage({
     .maybeSingle();
   const otherProfile = otherProfileData as Pick<Profile, "name"> | null;
 
+  await supabase
+    .from("messages")
+    .update({ read: true })
+    .eq("conversation_id", id)
+    .eq("read", false)
+    .neq("sender_id", user.id);
+
   const { data: messages } = await supabase
     .from("messages")
     .select("*")

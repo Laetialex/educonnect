@@ -23,7 +23,7 @@ export async function updateAppointmentStatus(formData: FormData) {
 
   await supabase
     .from("appointments")
-    .update({ status })
+    .update({ status, student_seen: false, prof_seen: true })
     .eq("id", appointmentId)
     .eq("prof_id", user.id);
 

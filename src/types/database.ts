@@ -23,6 +23,7 @@ export type Message = {
   sender_id: string;
   text: string;
   created_at: string;
+  read: boolean;
 };
 
 export type AppointmentStatus = "en_attente" | "accepte" | "refuse";
@@ -37,6 +38,8 @@ export type Appointment = {
   message: string | null;
   status: AppointmentStatus | string;
   created_at: string;
+  prof_seen: boolean;
+  student_seen: boolean;
 };
 
 export type Rating = {
@@ -46,6 +49,7 @@ export type Rating = {
   stars: number;
   comment: string | null;
   created_at: string;
+  prof_seen: boolean;
 };
 
 export type Database = {

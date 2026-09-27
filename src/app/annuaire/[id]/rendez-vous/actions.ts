@@ -39,6 +39,8 @@ export async function createAppointment(
     subject,
     message,
     status: "en_attente",
+    prof_seen: false,
+    student_seen: true,
   });
 
   if (error) {

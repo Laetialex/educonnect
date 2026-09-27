@@ -66,6 +66,7 @@ export default function MessageThread({
       sender_id: currentUserId,
       text: value,
       created_at: new Date().toISOString(),
+      read: false,
     };
     seenIds.current.add(optimistic.id);
     setMessages((prev) => [...prev, optimistic]);

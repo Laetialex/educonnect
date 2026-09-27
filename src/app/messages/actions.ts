@@ -26,6 +26,7 @@ export async function sendMessage(formData: FormData) {
     conversation_id: conversationId,
     sender_id: user.id,
     text,
+    read: false,
   });
 
   revalidatePath(`/messages/${conversationId}`);
