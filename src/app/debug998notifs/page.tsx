@@ -9,7 +9,12 @@ export default async function Debug998NotifsPage() {
   } = await supabase.auth.getUser();
 
   if (!user) {
-    return <pre>Pas connecté.</pre>;
+    return (
+      <div className="mx-auto max-w-xl px-4 py-16 text-lg">
+        Tu n&apos;es pas connecté. Connecte-toi d&apos;abord, puis reviens sur
+        cette page.
+      </div>
+    );
   }
 
   const { data: profile } = await supabase
@@ -18,10 +23,10 @@ export default async function Debug998NotifsPage() {
     .eq("id", user.id)
     .maybeSingle();
 
-  const counts = await getNotificationCounts(
-    user.id,
-    (profile as { role: string } | null)?.role ?? null
-  );
+  const role = (profile as { role: string } | null)?.role ?? "aucun profil";
+  const name = (profile as { name: string } | null)?.name ?? "(sans nom)";
+
+  const counts = await getNotificationCounts(user.id, role);
 
   const { data: conversations } = await supabase
     .from("conversations")
@@ -38,24 +43,48 @@ export default async function Debug998NotifsPage() {
         .select("*")
         .in("conversation_id", conversationIds)
         .order("created_at", { ascending: false })
-        .limit(10)
+        .limit(15)
     : { data: [] };
 
-  const { data: appointments } = await supabase
-    .from("appointments")
-    .select("*")
-    .or(`student_id.eq.${user.id},prof_id.eq.${user.id}`)
-    .order("created_at", { ascending: false })
-    .limit(10);
+  return (
+    <div className="mx-auto max-w-2xl px-4 py-16 text-lg leading-relaxed">
+      <p>
+        Tu es connecté en tant que : <strong>{name}</strong> (
+        {user.email}) — rôle : <strong>{role}</strong>
+      </p>
 
-  const data = {
-    userId: user.id,
-    profileRole: (profile as { role: string } | null)?.role ?? null,
-    counts,
-    conversations,
-    messages,
-    appointments,
-  };
+      <p className="mt-4 text-2xl">
+        Pastille &quot;Messagerie&quot; :{" "}
+        <strong className={counts.messages > 0 ? "text-red-600" : "text-slate-500"}>
+          {counts.messages}
+        </strong>
+      </p>
 
-  return <pre>{JSON.stringify(data, null, 2)}</pre>;
+      <h2 className="mt-8 font-bold">Tes 15 derniers messages (tous, envoyés et reçus) :</h2>
+      <ul className="mt-2 space-y-2 text-sm">
+        {(messages ?? []).length === 0 && <li>Aucun message.</li>}
+        {(messages ?? []).map((m) => {
+          const msg = m as {
+            id: string;
+            sender_id: string;
+            text: string;
+            read: boolean;
+          };
+          const sentByMe = msg.sender_id === user.id;
+          return (
+            <li key={msg.id} className="rounded-lg border border-slate-200 p-2">
+              {sentByMe ? "Envoyé par moi" : "Reçu"} — &quot;{msg.text}&quot; —{" "}
+              {sentByMe ? (
+                <span className="text-slate-400">(peu importe pour moi)</span>
+              ) : msg.read ? (
+                <span className="text-green-600">déjà lu</span>
+              ) : (
+                <span className="font-bold text-red-600">PAS ENCORE LU</span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
 }
